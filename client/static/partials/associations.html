@@ -1,0 +1,31 @@
+<div ng-controller='associationsController as assCon' class="row section">
+	<h3 class="center">Edit Associations</h3>
+	<div class="col s6 offset-s3">
+		<label>Player</label>
+		<select ng-model="assCon.newAssociation.p_id" >
+			<option ng-repeat='player in assCon.players' value="{{player.p_id}}">{{player.name}}</option>
+		</select>
+		<select ng-model="assCon.newAssociation.t_id">
+			<option ng-repeat='team in assCon.teams'  value="{{team.t_id}}">{{team.name}}</option>
+		</select>
+		<input type="text" ng-model='playCon.newPlayer.name' />
+		<button class="btn waves-effect waves-light" ng-click="assCon.addAssociation()">Assign Player to Team</button>
+		<div class="section"></div>
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Player Name</th>
+					<th>Team Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat='match in assCon.associations'>
+					<td>{{match.pname}}</td>
+					<td>{{match.tname}}</td>
+					<td><button class="btn waves-effect waves-light" ng-click='assCon.removeAssociation(match)'>Remove Association</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

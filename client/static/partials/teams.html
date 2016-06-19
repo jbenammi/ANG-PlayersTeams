@@ -1,0 +1,23 @@
+<div ng-controller='teamsController as teamCon' class="row section">
+	<h3 class="center">Edit Teams</h3>
+	<div class="col s4 offset-s4">
+		<label>Name</label>
+		<input type="text" ng-model='teamCon.newTeam.name' />
+		<button class="btn waves-effect waves-light" ng-click="teamCon.addTeam()">Add New Team</button>
+		<div class="section"></div>
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Team Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat='team in teamCon.teams'>
+					<td>{{team.name}}</td>
+					<td><button class="btn waves-effect waves-light" ng-click='teamCon.removeTeam(team)'>Remove Team</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

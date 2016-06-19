@@ -1,0 +1,23 @@
+<div ng-controller='playersController as playCon' class="row section">
+	<h3 class="center">Edit Players</h3>
+	<div class="col s4 offset-s4">
+		<label>Name</label>
+		<input type="text" ng-model='playCon.newPlayer.name' />
+		<button class="btn waves-effect waves-light" ng-click="playCon.addPlayer()">Add New Player</button>
+		<div class="section"></div>
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat='player in playCon.players'>
+					<td>{{player.name}}</td>
+					<td><button class="btn waves-effect waves-light" ng-click='playCon.removePlayer(player)'>Remove Player</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

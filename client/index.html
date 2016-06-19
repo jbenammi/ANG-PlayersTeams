@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='myApp'>
+<head>
+	<meta charset="UTF-8">
+	<meta name="author" content="Jonathan Ben-Ammi">
+	<title></title>
+	<meta name="description" content="">
+	<link rel="stylesheet" type="text/css" href="./../static/css/materialize.css">
+	<link rel="stylesheet" type="text/css" href="./../static/css/style.css">
+	<script src="./../static/js/jquery-2.2.3.js"></script>
+	<script src="./../static/js/jquery-ui.js"></script>
+	<script src="./../static/js/materialize.js"></script>
+	<script src="./../static/js/angular.js"></script>
+	<script src="./../static/js/angular-route.js"></script>
+	<script type="text/javascript">
+		var myApp = angular.module('myApp', ['ngRoute']);
+
+// This section handles the routing of the partials into index.html
+		myApp.config(function($routeProvider){
+			$routeProvider
+				.when('/players', {
+					templateUrl: 'static/partials/players.html'
+				})
+				.when('/teams', {
+					templateUrl: 'static/partials/teams.html'
+				})
+				.when('/associations', {
+					templateUrl: 'static/partials/associations.html'
+				})
+				.otherwise({
+					redirectTo: '/'
+				});
+		});
+
+// The playerFactory handles the creation, editing and removal of players.
+		myApp.factory('playerFactory', function(){
+			var players = [
+			{name: 'Jeff', teams: {t_id:""}, p_id:'Pvvhfqyna'},
+			{name: 'Hien', teams: {t_id:""}, p_id:'Ph8neva8q'},
+			{name: 'Edger', teams: {t_id:""}, p_id:'P4y5rauod'}			
+			];
+			
+			var factory = {};
+			//This function creates a unique id durring the creation of a new player that gets used durring associations and removal functions.
+			var playerId = function(){
+				id = "P";
+				options = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']
+				for(var x = 0; x< 8; x++){
+					var randNum = Math.floor((Math.random()*35));
+					id += options[randNum];
+				}
+				return id;
+			}
+
+			factory.getPlayers = function(callback){
+				callback(players);
+			}
+			factory.addPlayer = function(data){
+				data.teams = {t_id: ""};
+				data.p_id = playerId();
+				players.push(data);
+			}
+			factory.addTeams = function(association){
+				for(var player = 0; player < players.length; player++){
+					if(association.p_id == players[player].p_id){
+						players[player].teams.t_id = association.t_id;
+					}
+				}
+			}
+			factory.removeTeams = function(association){
+				for(var player = 0; player < players.length; player++){
+					if(association.p_id == players[player].p_id){
+						players[player].teams.t_id = "";
+					}
+				}				
+			}
+			// this function removes a player but only if there are no teams currently associated with a player. If there are, an alert is sent to the user to first remove those associations.
+			factory.removePlayer = function(player){
+				if(players[players.indexOf(player)].teams.t_id == ""){
+					players.splice(players.indexOf(player), 1);
+				}
+				else{
+					alert('Team association must be removed before player can be removed.');
+				}
+			}
+			return factory;
+		})
+
+// This is the team factory that handles the creation, editing and removal of teams. 		
+		myApp.factory('teamFactory', function(){
+			var teams = [
+			{name: 'Seahawks', players: [], t_id:'T2r1zj3gh'},
+			{name: 'Broncos', players: [], t_id:'Tykrnz6oj'},
+			{name: 'Patriots', players: [], t_id:'Tucbebad0'}			
+			];
+
+			var factory = {};
+			// this function creates a unique team id durrent the creation of a new team that gets used durring associations and removal functions. 
+			var teamId = function(){
+				id = "T";
+				options = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9']
+				for(var x = 0; x< 8; x++){
+					var randNum = Math.floor((Math.random()*35));
+					id += options[randNum];
+				}
+				return id;
+			}
+
+			factory.getTeams = function(callback){
+				callback(teams);
+			}
+			factory.addTeam = function(team){
+				team.players = [];
+				team.t_id = teamId();
+				teams.push(team);
+			}
+			factory.addPlayers = function(association){
+				player= {p_id: association.p_id}
+				for(var team=0; team<teams.length; team++){
+					if(teams[team].t_id == association.t_id){
+						teams[team].players.push(player);
+					}
+				}
+			};
+			factory.removePlayers = function(association){
+				for(var team=0; team<teams.length; team++){
+					if(teams[team].t_id == association.t_id){
+						for(var x = 0; x<teams[team].players.length; x++){
+							if(teams[team].players[x].p_id == association.p_id){
+								teams[team].players.splice(x, 1);
+							}
+						}
+					}				
+				}
+			};
+			// this function allows for the removal of a team only if there are no players currently associated with the team. If there are, an alert is sent telling the user to remove all associations first.
+			factory.removeTeam = function(team){
+				if(teams[teams.indexOf(team)].players.length == 0){
+					teams.splice(teams.indexOf(team), 1);
+				}
+				else{
+					alert('You must remove all associations before removing a team.');
+				}
+			}
+			return factory;
+		});
+
+// this controller handles all the passing of data to the player factory for the players.html partial. 
+		myApp.controller('playersController', function(playerFactory){
+			var self = this;
+			this.players = [];
+			this.newPlayer = {};
+
+			playerFactory.getPlayers(function(data){
+				self.players = data;
+			});
+			this.addPlayer = function(){
+				playerFactory.addPlayer(this.newPlayer);
+				this.newPlayer = {};
+			}
+			this.removePlayer = function(player){
+				playerFactory.removePlayer(player);
+			}
+		});
+// This controller handles all the passing of data to the team factory for the teams.html partial.
+		myApp.controller('teamsController', function(teamFactory){
+			var self = this;
+			this.teams = [];
+			this.newTeam = {};
+
+			teamFactory.getTeams(function(data){
+				self.teams = data;
+			});
+			this.addTeam = function(){
+				teamFactory.addTeam(this.newTeam);
+				this.newTeam = {};
+			}
+			this.removeTeam = function(team){
+				teamFactory.removeTeam(team);
+			}
+		});
+//This controller handles all the passing of data to the team and player factories for the associations.html partial. 
+		myApp.controller('associationsController', function(teamFactory, playerFactory){
+			var self = this;
+			this.associations = [];
+			this.teams = [];
+			this.players = [];
+			this.newAssociation = {};
+
+			playerFactory.getPlayers(function(data){
+				self.players = data;
+			});
+			teamFactory.getTeams(function(data){
+				self.teams = data;
+			});
+			getAssociations();
+			//This function gets all associations from the players that have a team id associated with them. This is done by going through each player and creating a "new association" only if they do. Then the function will go through all the teams to find the matching team ID for that matched association. Once done the complete new association is pushed to the associations list.
+			function getAssociations(){
+				for(var index = 0; index < self.players.length; index++){
+					if(self.players[index].teams.t_id != ""){
+						self.newAssociation.pname = self.players[index].name;
+						self.newAssociation.p_id = self.players[index].p_id;
+						for (var i = 0; i < self.teams.length; i++) {
+							if(self.teams[i].t_id == self.players[index].teams.t_id){
+								self.newAssociation.tname = self.teams[i].name;
+								self.newAssociation.t_id = self.teams[i].t_id;
+							}
+						}
+						self.associations.push(self.newAssociation);
+						self.newAssociation = {};
+					}
+				}
+			};
+			// This function will allow for the association linking of a player with a team. This is only allowed if a player does not already have an association made. If they do an alert is sent letting the user know they must first remove the current association before making a new one.
+			this.addAssociation = function(){
+				for(var player=0; player< this.players.length; player++){
+					if(this.players[player].teams.t_id == "" && this.players[player].p_id == this.newAssociation.p_id){
+						playerFactory.addTeams(this.newAssociation);
+						teamFactory.addPlayers(this.newAssociation);
+						this.associations = [];
+						getAssociations();
+						this.newAssociation = {};
+					}
+					else if(this.players[player].teams.t_id != "" && this.players[player].p_id == this.newAssociation.p_id)
+					{
+						alert('You must remove the current association before assigning a new one');
+						this.newAssociation = {};
+					}
+				}
+			};
+			//this function will remove an association and call on the get associations function to refresh the associations list.
+			this.removeAssociation = function(association){
+				teamFactory.removePlayers(association);
+				playerFactory.removeTeams(association);
+				this.associations = [];				
+				getAssociations();
+			};
+
+		})
+	</script>
+</head>
+<body>
+<nav>
+	<div class="nav-wrapper blue-grey">
+		<a href="#/" class="brand-logo">Team/Player Assignments</a>
+		<ul class="right">
+			<li><a href="#/players">Edit Players</a></li>
+			<li><a href="#/teams">Edit Teams</a></li>
+			<li><a href="#/associations">Edit Associations</a></li>
+		</ul>
+	</div>
+</nav>
+	<div ng-view="" class="container">
+		
+	</div>
+</body>
+</html>
